@@ -48,11 +48,15 @@
       <input type="text" id="auth-email" placeholder="toi@exemple.com" autocomplete="email">
       <label class="field-label field-label-password" for="auth-password">Mot de passe</label>
       <input type="password" id="auth-password" placeholder="6 caractères minimum" autocomplete="current-password">
+      <div id="auth-confirm-wrap">
+        <label class="field-label field-label-password" for="auth-password-confirm">Confirmer le mot de passe</label>
+        <input type="password" id="auth-password-confirm" placeholder="Retape ton mot de passe" autocomplete="new-password">
+      </div>
       <p id="auth-error" class="auth-error"></p>
 
-      <button class="btn btn-primary btn-full btn-login" id="btn-login">Se connecter</button>
+      <button class="btn btn-primary btn-full btn-login" id="btn-auth-submit">Se connecter</button>
       <div class="auth-divider">ou</div>
-      <button class="btn btn-full" id="btn-signup">Créer un compte</button>
+      <button class="btn btn-full" id="btn-auth-toggle">Créer un compte</button>
       <p id="auth-hint" class="auth-hint"></p>
     </div>
   </section>

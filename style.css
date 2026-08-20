@@ -72,6 +72,8 @@
   }
   .auth-back{position:absolute;top:20px;left:24px;}
   .field-label.field-label-password{margin-top:12px;}
+  #auth-confirm-wrap{display:none;}
+  #modal-auth-confirm-wrap{display:none;}
   .auth-error{font-size:12px;color:var(--accent-ink);margin:8px 0 0;display:none;}
   .auth-hint{font-size:11px;color:var(--ink-soft);margin-top:14px;line-height:1.5;}
   .btn-login{margin-top:16px;}

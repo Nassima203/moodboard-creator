@@ -121,9 +121,31 @@
     el.style.display = msg ? 'block' : 'none';
   }
 
-  function renderAuthScreen(){
+  var authMode = 'login';
+
+  function setAuthMode(mode){
+    authMode = mode;
     showAuthError('');
-    $('#auth-hint').textContent = 'Ton mot de passe est géré par Supabase, jamais stocké en clair.';
+    $('#auth-password').value = '';
+    $('#auth-password-confirm').value = '';
+    if(mode === 'signup'){
+      $('#auth-confirm-wrap').style.display = 'block';
+      $('#auth-password').setAttribute('autocomplete', 'new-password');
+      $('#btn-auth-submit').textContent = 'Valider';
+      $('#btn-auth-toggle').textContent = 'Déjà un compte ? Se connecter';
+      $('#auth-hint').textContent = 'Ton mot de passe est géré par Supabase, jamais stocké en clair.';
+    } else {
+      $('#auth-confirm-wrap').style.display = 'none';
+      $('#auth-password').setAttribute('autocomplete', 'current-password');
+      $('#btn-auth-submit').textContent = 'Se connecter';
+      $('#btn-auth-toggle').textContent = 'Créer un compte';
+      $('#auth-hint').textContent = '';
+    }
+  }
+
+  function renderAuthScreen(mode){
+    $('#auth-email').value = '';
+    setAuthMode(mode || 'login');
   }
 
   async function initApp(){
@@ -140,7 +162,7 @@
   });
   $('#landing-login-link').addEventListener('click', function(){
     showScreen('auth');
-    renderAuthScreen();
+    renderAuthScreen('login');
   });
   $('#btn-auth-back').addEventListener('click', function(){
     showScreen('landing');
@@ -153,11 +175,33 @@
     await renderDashboard();
   }
 
-  $('#btn-signup').addEventListener('click', async function(){
+  $('#btn-auth-toggle').addEventListener('click', function(){
+    setAuthMode(authMode === 'login' ? 'signup' : 'login');
+  });
+
+  $('#btn-auth-submit').addEventListener('click', async function(){
     var email = $('#auth-email').value.trim();
     var password = $('#auth-password').value;
+
+    if(authMode === 'login'){
+      if(!email || !password){
+        showAuthError('Entre ton email et ton mot de passe.');
+        return;
+      }
+      showAuthError('');
+      var res = await supabase.auth.signInWithPassword({ email: email, password: password });
+      if(res.error){ showAuthError(res.error.message); return; }
+      login(res.data.session.user);
+      return;
+    }
+
+    var confirmPassword = $('#auth-password-confirm').value;
     if(!email || password.length < 6){
       showAuthError('Entre un email et un mot de passe de 6 caractères minimum.');
+      return;
+    }
+    if(password !== confirmPassword){
+      showAuthError('Les deux mots de passe ne correspondent pas.');
       return;
     }
     showAuthError('');
@@ -167,20 +211,8 @@
       login(res.data.session.user);
     } else {
       toast('Compte créé. Vérifie ta boîte mail pour confirmer, puis connecte-toi.');
+      setAuthMode('login');
     }
-  });
-
-  $('#btn-login').addEventListener('click', async function(){
-    var email = $('#auth-email').value.trim();
-    var password = $('#auth-password').value;
-    if(!email || !password){
-      showAuthError('Entre ton email et ton mot de passe.');
-      return;
-    }
-    showAuthError('');
-    var res = await supabase.auth.signInWithPassword({ email: email, password: password });
-    if(res.error){ showAuthError(res.error.message); return; }
-    login(res.data.session.user);
   });
 
   $('#btn-logout').addEventListener('click', async function(){
@@ -727,17 +759,22 @@
   });
 
   function openAuthModal(){
+    var mode = 'signup';
     var html =
-      '<h3>Créer un compte pour enregistrer</h3>' +
-      '<p>Ton moodboard est prêt. Connecte-toi ou crée un compte gratuit pour le sauvegarder.</p>' +
+      '<h3 id="modal-auth-title">Créer un compte pour enregistrer</h3>' +
+      '<p id="modal-auth-sub">Ton moodboard est prêt. Crée un compte gratuit pour le sauvegarder.</p>' +
       '<label class="field-label" for="modal-auth-email">Email</label>' +
       '<input type="text" id="modal-auth-email" placeholder="toi@exemple.com" autocomplete="email">' +
       '<label class="field-label modal-auth-field" for="modal-auth-password">Mot de passe</label>' +
       '<input type="password" id="modal-auth-password" placeholder="6 caractères minimum" autocomplete="new-password">' +
+      '<div id="modal-auth-confirm-wrap">' +
+        '<label class="field-label modal-auth-field" for="modal-auth-password-confirm">Confirmer le mot de passe</label>' +
+        '<input type="password" id="modal-auth-password-confirm" placeholder="Retape ton mot de passe" autocomplete="new-password">' +
+      '</div>' +
       '<p id="modal-auth-error" class="modal-auth-error"></p>' +
       '<div class="modal-actions modal-actions-stacked">' +
-        '<button class="btn btn-primary btn-full" id="modal-btn-signup">Créer un compte et enregistrer</button>' +
-        '<button class="btn btn-full" id="modal-btn-login">J’ai déjà un compte</button>' +
+        '<button class="btn btn-primary btn-full" id="modal-btn-submit">Valider</button>' +
+        '<button class="btn btn-full" id="modal-btn-toggle">J’ai déjà un compte</button>' +
       '</div>';
 
     openModal(html, function(box){
@@ -747,6 +784,33 @@
         errEl.style.display = msg ? 'block' : 'none';
       }
 
+      function applyModalAuthMode(){
+        showModalAuthError('');
+        box.querySelector('#modal-auth-password').value = '';
+        box.querySelector('#modal-auth-password-confirm').value = '';
+        if(mode === 'signup'){
+          box.querySelector('#modal-auth-confirm-wrap').style.display = 'block';
+          box.querySelector('#modal-auth-password').setAttribute('autocomplete', 'new-password');
+          box.querySelector('#modal-btn-submit').textContent = 'Valider';
+          box.querySelector('#modal-btn-toggle').textContent = 'J’ai déjà un compte';
+          box.querySelector('#modal-auth-title').textContent = 'Créer un compte pour enregistrer';
+          box.querySelector('#modal-auth-sub').textContent = 'Ton moodboard est prêt. Crée un compte gratuit pour le sauvegarder.';
+        } else {
+          box.querySelector('#modal-auth-confirm-wrap').style.display = 'none';
+          box.querySelector('#modal-auth-password').setAttribute('autocomplete', 'current-password');
+          box.querySelector('#modal-btn-submit').textContent = 'Connexion';
+          box.querySelector('#modal-btn-toggle').textContent = 'Créer un compte';
+          box.querySelector('#modal-auth-title').textContent = 'Se connecter pour enregistrer';
+          box.querySelector('#modal-auth-sub').textContent = 'Connecte-toi pour sauvegarder ton moodboard.';
+        }
+      }
+      applyModalAuthMode();
+
+      box.querySelector('#modal-btn-toggle').addEventListener('click', function(){
+        mode = mode === 'signup' ? 'login' : 'signup';
+        applyModalAuthMode();
+      });
+
       function afterAuthSuccess(user){
         state.user = user;
         $('#who-label').textContent = user.email;
@@ -754,11 +818,29 @@
         saveBoard();
       }
 
-      box.querySelector('#modal-btn-signup').addEventListener('click', async function(){
+      box.querySelector('#modal-btn-submit').addEventListener('click', async function(){
         var email = box.querySelector('#modal-auth-email').value.trim();
         var password = box.querySelector('#modal-auth-password').value;
+
+        if(mode === 'login'){
+          if(!email || !password){
+            showModalAuthError('Entre ton email et ton mot de passe.');
+            return;
+          }
+          showModalAuthError('');
+          var res = await supabase.auth.signInWithPassword({ email: email, password: password });
+          if(res.error){ showModalAuthError(res.error.message); return; }
+          afterAuthSuccess(res.data.session.user);
+          return;
+        }
+
+        var confirmPassword = box.querySelector('#modal-auth-password-confirm').value;
         if(!email || password.length < 6){
           showModalAuthError('Entre un email et un mot de passe de 6 caractères minimum.');
+          return;
+        }
+        if(password !== confirmPassword){
+          showModalAuthError('Les deux mots de passe ne correspondent pas.');
           return;
         }
         showModalAuthError('');
@@ -769,19 +851,6 @@
         } else {
           showModalAuthError('Compte créé. Vérifie ta boîte mail pour confirmer, puis reviens enregistrer.');
         }
-      });
-
-      box.querySelector('#modal-btn-login').addEventListener('click', async function(){
-        var email = box.querySelector('#modal-auth-email').value.trim();
-        var password = box.querySelector('#modal-auth-password').value;
-        if(!email || !password){
-          showModalAuthError('Entre ton email et ton mot de passe.');
-          return;
-        }
-        showModalAuthError('');
-        var res = await supabase.auth.signInWithPassword({ email: email, password: password });
-        if(res.error){ showModalAuthError(res.error.message); return; }
-        afterAuthSuccess(res.data.session.user);
       });
     });
   }
