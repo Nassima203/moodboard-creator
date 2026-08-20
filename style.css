@@ -243,6 +243,33 @@
   }
   .el-toolbar input[type=color]{width:24px;height:24px;border:none;background:none;padding:0;cursor:pointer;}
 
+  .font-picker{position:relative;}
+  .el-toolbar .font-picker-btn{
+    background:#2c2a25;color:#fbf9f3;border:none;border-radius:12px;font-size:11px;padding:5px 10px;
+    font-family:'Space Grotesk',sans-serif;max-width:120px;overflow:hidden;text-overflow:ellipsis;
+    white-space:nowrap;display:block;
+  }
+  .el-toolbar .font-picker-btn:hover{background:#3a372f;}
+  .font-picker-panel{
+    position:absolute;top:calc(100% + 6px);left:50%;transform:translateX(-50%);
+    width:230px;background:var(--paper);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,0.25);
+    padding:8px;z-index:20;white-space:normal;
+  }
+  .font-picker-search{
+    width:100%;padding:8px 10px;font-family:'Space Grotesk',sans-serif;font-size:13px;
+    border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink);margin-bottom:6px;
+  }
+  .font-picker-search:focus{outline:2px solid var(--accent);outline-offset:0;}
+  .font-picker-list{max-height:220px;overflow-y:auto;display:flex;flex-direction:column;gap:1px;}
+  .font-picker-list .font-picker-item{
+    background:transparent;border:none;text-align:left;padding:7px 8px;border-radius:6px;
+    font-size:14px;color:var(--ink);cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    display:block;width:100%;flex-shrink:0;
+  }
+  .font-picker-list .font-picker-item:hover{background:var(--accent-soft);}
+  .font-picker-list .font-picker-item.active{background:var(--accent-soft);color:var(--accent-ink);font-weight:600;}
+  .font-picker-empty{padding:12px 8px;font-size:12px;color:var(--ink-soft);text-align:center;}
+
   .hint-empty{
     position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
     text-align:center;color:var(--ink-soft);pointer-events:none;width:380px;max-width:80vw;z-index:5;

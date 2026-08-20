@@ -22,6 +22,40 @@
 
   var COLOR_PRESETS = ["#E7DCC8","#C9502F","#3452EB","#1D9E75","#211F1B","#F2C879","#D4537E","#5F5E5A","#97C459","#7F77DD"];
 
+  // ---------- FONT CATALOG (1800+ Google Fonts, chargées à la demande) ----------
+  var FONT_FALLBACK = {S:'sans-serif', R:'serif', D:'sans-serif', H:'cursive', M:'monospace'};
+  var FONT_CAT_LABEL = {S:'Sans', R:'Serif', D:'Display', H:'Manuscrite', M:'Monospace'};
+  var favoriteNames = FONTS.map(function(f){ return f.label; });
+  var loadedFontLinks = {};
+
+  function fontValueFor(family, cat){
+    return "'" + family + "', " + (FONT_FALLBACK[cat] || 'sans-serif');
+  }
+
+  // Catalogue complet: favoris épinglés en tête, puis le reste trié par popularité
+  var FULL_FONTS = FONTS.slice();
+  (window.GOOGLE_FONTS_FULL || []).forEach(function(entry){
+    var family = entry[0], cat = entry[1];
+    if(favoriteNames.indexOf(family) !== -1) return;
+    FULL_FONTS.push({label: family, value: fontValueFor(family, cat), cat: cat});
+  });
+
+  function ensureFontLoaded(family){
+    if(!family || loadedFontLinks[family]) return;
+    loadedFontLinks[family] = true;
+    var link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = 'https://fonts.googleapis.com/css2?family=' + encodeURIComponent(family).replace(/%20/g,'+') + ':wght@400;700&display=swap';
+    document.head.appendChild(link);
+  }
+  // les favoris sont déjà chargés via le <link> statique de index.html
+  favoriteNames.forEach(function(n){ loadedFontLinks[n] = true; });
+
+  function extractFamily(fontValue){
+    var m = /^'([^']+)'/.exec(fontValue || '');
+    return m ? m[1] : '';
+  }
+
   var state = {
     user: null,
     board: null,
@@ -329,6 +363,7 @@
         (data.src ? '<img src="'+data.src+'" alt="">' : '<div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:11px;color:var(--ink-soft);font-family:Space Mono,monospace;">chargement...</div>') +
         '</div></div>';
     } else if(data.type === 'text'){
+      ensureFontLoaded(extractFamily(data.font));
       inner += '<div class="el-pin"></div>';
       inner += '<div class="el-text-frame"><div class="el-text-content" contenteditable="true" style="font-family:'+data.font+';font-size:'+data.size+'px;color:'+data.color+';">'+escapeHtml(data.content)+'</div></div>';
     } else if(data.type === 'color'){
@@ -358,6 +393,7 @@
       frame.style.background = data.hex;
       frame.querySelector('.el-color-tag').textContent = '#' + data.hex.replace('#','').toUpperCase();
     } else if(data.type === 'text'){
+      ensureFontLoaded(extractFamily(data.font));
       var content = node.querySelector('.el-text-content');
       content.style.fontFamily = data.font;
       content.style.fontSize = data.size + 'px';
@@ -452,6 +488,103 @@
     }
   }
 
+  function buildFontPicker(data){
+    var wrap = document.createElement('div');
+    wrap.className = 'font-picker';
+
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'font-picker-btn';
+    btn.textContent = extractFamily(data.font) || 'Police';
+    btn.title = 'Choisir une police (' + FULL_FONTS.length + ' disponibles)';
+    wrap.appendChild(btn);
+
+    var panel = null;
+
+    function closePanel(){
+      if(!panel) return;
+      panel.remove();
+      panel = null;
+      document.removeEventListener('pointerdown', onOutside, {capture:true});
+    }
+    function onOutside(e){
+      if(panel && !wrap.contains(e.target)) closePanel();
+    }
+
+    function renderList(query){
+      var listEl = panel.querySelector('.font-picker-list');
+      listEl.innerHTML = '';
+      var q = query.trim().toLowerCase();
+      var matches = FULL_FONTS.filter(function(f){
+        return !q || f.label.toLowerCase().indexOf(q) !== -1;
+      }).slice(0, 150);
+
+      if(!matches.length){
+        var empty = document.createElement('div');
+        empty.className = 'font-picker-empty';
+        empty.textContent = 'Aucune police trouvée';
+        listEl.appendChild(empty);
+        return;
+      }
+
+      var observer = new IntersectionObserver(function(entries){
+        entries.forEach(function(entry){
+          if(entry.isIntersecting){
+            var family = entry.target.getAttribute('data-family');
+            ensureFontLoaded(family);
+            entry.target.style.fontFamily = "'" + family + "', sans-serif";
+            observer.unobserve(entry.target);
+          }
+        });
+      }, {root: listEl, rootMargin: '80px'});
+
+      matches.forEach(function(f){
+        var item = document.createElement('button');
+        item.type = 'button';
+        item.className = 'font-picker-item' + (f.value === data.font ? ' active' : '');
+        item.setAttribute('data-family', f.label);
+        item.textContent = f.label;
+        item.addEventListener('pointerdown', function(e){ e.stopPropagation(); });
+        item.addEventListener('click', function(){
+          data.font = f.value;
+          refreshElementNode(data);
+          markDirty();
+          btn.textContent = f.label;
+          closePanel();
+        });
+        listEl.appendChild(item);
+        observer.observe(item);
+      });
+    }
+
+    function openPanel(){
+      if(panel) return;
+      panel = document.createElement('div');
+      panel.className = 'font-picker-panel';
+      panel.innerHTML = '<input type="text" class="font-picker-search" placeholder="Rechercher une police…">' +
+        '<div class="font-picker-list"></div>';
+      wrap.appendChild(panel);
+
+      var search = panel.querySelector('.font-picker-search');
+      search.addEventListener('pointerdown', function(e){ e.stopPropagation(); });
+      search.addEventListener('click', function(e){ e.stopPropagation(); });
+      search.addEventListener('input', function(){ renderList(search.value); });
+      search.addEventListener('keydown', function(e){ if(e.key === 'Escape') closePanel(); });
+      renderList('');
+      setTimeout(function(){ search.focus(); }, 0);
+
+      document.addEventListener('pointerdown', onOutside, {capture:true});
+    }
+
+    btn.addEventListener('pointerdown', function(e){ e.stopPropagation(); });
+    btn.addEventListener('click', function(e){
+      e.stopPropagation();
+      if(panel) closePanel(); else openPanel();
+    });
+
+    return wrap;
+  }
+
   function buildElementToolbar(data, node){
     var tb = document.createElement('div');
     tb.className = 'el-toolbar';
@@ -486,20 +619,7 @@
     tb.appendChild(dupBtn);
 
     if(data.type === 'text'){
-      var fontSel = document.createElement('select');
-      FONTS.forEach(function(f){
-        var opt = document.createElement('option');
-        opt.value = f.value; opt.textContent = f.label;
-        if(f.value === data.font) opt.selected = true;
-        fontSel.appendChild(opt);
-      });
-      fontSel.addEventListener('pointerdown', function(e){ e.stopPropagation(); });
-      fontSel.addEventListener('change', function(){
-        data.font = fontSel.value;
-        refreshElementNode(data);
-        markDirty();
-      });
-      tb.appendChild(fontSel);
+      tb.appendChild(buildFontPicker(data));
 
       var colorInput = document.createElement('input');
       colorInput.type = 'color';
