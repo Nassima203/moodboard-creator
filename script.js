@@ -217,7 +217,7 @@
       }).join('');
       var date = b.updatedAt ? new Date(b.updatedAt).toLocaleDateString('fr-FR', {day:'numeric', month:'short'}) : '';
       return '<div class="card" data-id="'+b.id+'">' +
-        '<div class="card-preview">'+ (swatches || '<span style="font-size:11px;color:var(--ink-soft);font-family:Space Mono,monospace;">tableau vide</span>') +'</div>' +
+        '<div class="card-preview">'+ (swatches || '<span class="card-preview-empty">tableau vide</span>') +'</div>' +
         '<div class="card-body"><p class="card-name">'+escapeHtml(b.name)+'</p><p class="card-date">'+ (b.elementCount||0) +' éléments · '+date+'</p></div>' +
         '<button class="btn-icon card-del" data-del="'+b.id+'" title="Supprimer"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg></button>' +
         '</div>';
@@ -360,7 +360,7 @@
     if(data.type === 'image'){
       inner += '<div class="el-tape"></div>';
       inner += '<div class="el-frame"><div class="el-img-wrap">' +
-        (data.src ? '<img src="'+data.src+'" alt="">' : '<div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:11px;color:var(--ink-soft);font-family:Space Mono,monospace;">chargement...</div>') +
+        (data.src ? '<img src="'+data.src+'" alt="">' : '<div class="img-loading-placeholder">chargement...</div>') +
         '</div></div>';
     } else if(data.type === 'text'){
       ensureFontLoaded(extractFamily(data.font));
@@ -387,7 +387,7 @@
     node.style.transform = 'rotate(' + data.rotation + 'deg)';
     if(data.type === 'image'){
       var img = node.querySelector('.el-img-wrap');
-      img.innerHTML = data.src ? '<img src="'+data.src+'" alt="">' : '<div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:11px;color:var(--ink-soft);font-family:Space Mono,monospace;">chargement...</div>';
+      img.innerHTML = data.src ? '<img src="'+data.src+'" alt="">' : '<div class="img-loading-placeholder">chargement...</div>';
     } else if(data.type === 'color'){
       var frame = node.querySelector('.el-color-frame');
       frame.style.background = data.hex;
@@ -732,10 +732,10 @@
       '<p>Ton moodboard est prêt. Connecte-toi ou crée un compte gratuit pour le sauvegarder.</p>' +
       '<label class="field-label" for="modal-auth-email">Email</label>' +
       '<input type="text" id="modal-auth-email" placeholder="toi@exemple.com" autocomplete="email">' +
-      '<label class="field-label" for="modal-auth-password" style="margin-top:12px;">Mot de passe</label>' +
+      '<label class="field-label modal-auth-field" for="modal-auth-password">Mot de passe</label>' +
       '<input type="password" id="modal-auth-password" placeholder="6 caractères minimum" autocomplete="new-password">' +
-      '<p id="modal-auth-error" style="font-size:12px;color:var(--accent-ink);margin:8px 0 0;display:none;"></p>' +
-      '<div class="modal-actions" style="flex-direction:column;align-items:stretch;gap:8px;margin-top:16px;">' +
+      '<p id="modal-auth-error" class="modal-auth-error"></p>' +
+      '<div class="modal-actions modal-actions-stacked">' +
         '<button class="btn btn-primary btn-full" id="modal-btn-signup">Créer un compte et enregistrer</button>' +
         '<button class="btn btn-full" id="modal-btn-login">J’ai déjà un compte</button>' +
       '</div>';

@@ -30,30 +30,30 @@
       </button>
     </div>
     <div class="landing-deco" aria-hidden="true">
-      <div class="deco-card deco-color" style="top:16%;left:8%;transform:rotate(-8deg);background:#3452EB;"><span class="deco-tag">#3452EB</span></div>
+      <div class="deco-card deco-color deco-blue"><span class="deco-tag">#3452EB</span></div>
       <div class="deco-card deco-text deco-text-1"><span>crée, épingle, rêve</span></div>
-      <div class="deco-card deco-color" style="bottom:14%;left:12%;transform:rotate(5deg);background:#D4537E;"><span class="deco-tag">#D4537E</span></div>
-      <div class="deco-card deco-text" style="bottom:18%;right:11%;transform:rotate(-5deg);"><span style="font-family:'Permanent Marker',cursive;font-size:20px;">idées</span></div>
+      <div class="deco-card deco-color deco-pink"><span class="deco-tag">#D4537E</span></div>
+      <div class="deco-card deco-text deco-idea"><span>idées</span></div>
     </div>
   </section>
 
   <!-- AUTH SCREEN -->
   <section id="screen-auth" class="screen">
-    <button class="landing-link" id="btn-auth-back" style="position:absolute;top:20px;left:24px;">← Accueil</button>
+    <button class="landing-link auth-back" id="btn-auth-back">← Accueil</button>
     <div class="auth-card">
       <div class="logo auth-title">NASSIMOOD<span class="dot">.</span></div>
       <p class="auth-sub">Ton atelier de moodboards — images, typographies et couleurs, épinglées.</p>
 
       <label class="field-label" for="auth-email">Email</label>
       <input type="text" id="auth-email" placeholder="toi@exemple.com" autocomplete="email">
-      <label class="field-label" for="auth-password" style="margin-top:12px;">Mot de passe</label>
+      <label class="field-label field-label-password" for="auth-password">Mot de passe</label>
       <input type="password" id="auth-password" placeholder="6 caractères minimum" autocomplete="current-password">
-      <p id="auth-error" style="font-size:12px;color:var(--accent-ink);margin:8px 0 0;display:none;"></p>
+      <p id="auth-error" class="auth-error"></p>
 
-      <button class="btn btn-primary btn-full" id="btn-login" style="margin-top:16px;">Se connecter</button>
+      <button class="btn btn-primary btn-full btn-login" id="btn-login">Se connecter</button>
       <div class="auth-divider">ou</div>
       <button class="btn btn-full" id="btn-signup">Créer un compte</button>
-      <p id="auth-hint" style="font-size:11px;color:var(--ink-soft);margin-top:14px;line-height:1.5;"></p>
+      <p id="auth-hint" class="auth-hint"></p>
     </div>
   </section>
 
@@ -83,7 +83,8 @@
       <div class="topbar-left">
         <button class="btn-icon" id="btn-back" title="Retour aux projets">←</button>
         <div class="editor-name-wrap">
-          <input type="text" id="board-name-input" value="Sans titre">
+          <label for="board-name-input" class="sr-only">Nom du moodboard</label>
+          <input type="text" id="board-name-input" value="Sans titre" placeholder="Nom du moodboard">
         </div>
       </div>
       <div class="topbar-right">
@@ -115,7 +116,7 @@
         </button>
       </div>
     </div>
-    <input type="file" id="file-input" accept="image/*" style="display:none;">
+    <input type="file" id="file-input" class="file-input-hidden" accept="image/*" aria-label="Choisir une image à épingler">
   </section>
 
 </div>
