@@ -60,8 +60,44 @@
     user: null,
     board: null,
     selectedId: null,
-    savedSnapshot: null
+    savedSnapshot: null,
+    zoom: 1
   };
+
+  var ZOOM_MIN = 0.25, ZOOM_MAX = 2, ZOOM_STEP = 0.1;
+  var CANVAS_W = 1600, CANVAS_H = 1400;
+
+  function applyZoom(){
+    $('#canvas').style.transform = 'scale(' + state.zoom + ')';
+    $('#canvas-scaler').style.width = (CANVAS_W * state.zoom) + 'px';
+    $('#canvas-scaler').style.height = (CANVAS_H * state.zoom) + 'px';
+    $('#zoom-level').textContent = Math.round(state.zoom * 100) + '%';
+  }
+
+  function setZoom(newZoom, pivotClientX, pivotClientY){
+    newZoom = Math.round(Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, newZoom)) * 100) / 100;
+    if(newZoom === state.zoom) return;
+    var wrap = $('#canvas-wrap');
+    var rect = wrap.getBoundingClientRect();
+    var offsetX = (pivotClientX != null ? pivotClientX : rect.left + rect.width/2) - rect.left;
+    var offsetY = (pivotClientY != null ? pivotClientY : rect.top + rect.height/2) - rect.top;
+    var contentX = (wrap.scrollLeft + offsetX) / state.zoom;
+    var contentY = (wrap.scrollTop + offsetY) / state.zoom;
+    state.zoom = newZoom;
+    applyZoom();
+    wrap.scrollLeft = contentX * newZoom - offsetX;
+    wrap.scrollTop = contentY * newZoom - offsetY;
+  }
+
+  $('#btn-zoom-in').addEventListener('click', function(){ setZoom(state.zoom + ZOOM_STEP); });
+  $('#btn-zoom-out').addEventListener('click', function(){ setZoom(state.zoom - ZOOM_STEP); });
+  $('#btn-zoom-reset').addEventListener('click', function(){ setZoom(1); });
+
+  $('#canvas-wrap').addEventListener('wheel', function(e){
+    if(!(e.ctrlKey || e.metaKey)) return;
+    e.preventDefault();
+    setZoom(state.zoom + (e.deltaY > 0 ? -ZOOM_STEP : ZOOM_STEP), e.clientX, e.clientY);
+  }, { passive:false });
 
   function $(sel){ return document.querySelector(sel); }
   function $all(sel){ return Array.prototype.slice.call(document.querySelectorAll(sel)); }
@@ -317,6 +353,8 @@
     $('#board-name-input').value = state.board.name;
     $('#save-status').textContent = state.savedSnapshot ? 'enregistré' : 'non enregistré';
     state.selectedId = null;
+    state.zoom = 1;
+    applyZoom();
     var canvas = $('#canvas');
     canvas.innerHTML = '';
     canvas.appendChild(buildEmptyHint());
@@ -458,13 +496,13 @@
 
     node.addEventListener('pointermove', function(e){
       if(dragging){
-        var dx = e.clientX - startX, dy = e.clientY - startY;
+        var dx = (e.clientX - startX) / state.zoom, dy = (e.clientY - startY) / state.zoom;
         data.x = Math.max(0, startLeft + dx);
         data.y = Math.max(0, startTop + dy);
         node.style.left = data.x + 'px';
         node.style.top = data.y + 'px';
       } else if(resizing){
-        var ddx = e.clientX - startX, ddy = e.clientY - startY;
+        var ddx = (e.clientX - startX) / state.zoom, ddy = (e.clientY - startY) / state.zoom;
         data.w = Math.max(80, startW + ddx);
         data.h = Math.max(80, startH + ddy);
         node.style.width = data.w + 'px';

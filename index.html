@@ -96,12 +96,18 @@
         <button class="btn btn-primary" id="btn-save">Enregistrer</button>
       </div>
     </header>
-    <div class="canvas-wrap">
-      <div id="canvas">
-        <div class="hint-empty" id="hint-empty">
-          <h3>Tableau vide</h3>
-          <p>Utilise la barre en bas pour épingler une image, un mot ou une couleur.</p>
+    <div class="canvas-wrap" id="canvas-wrap">
+      <div id="canvas-scaler">
+        <div id="canvas">
+          <div class="hint-empty" id="hint-empty">
+          </div>
         </div>
+      </div>
+      <div class="zoom-controls">
+        <button class="zoom-btn" id="btn-zoom-out" title="Zoom arrière">−</button>
+        <span class="zoom-level" id="zoom-level">100%</span>
+        <button class="zoom-btn" id="btn-zoom-in" title="Zoom avant">+</button>
+        <button class="zoom-btn zoom-reset" id="btn-zoom-reset" title="Réinitialiser le zoom">⟲</button>
       </div>
     </div>
     <div class="toolbar">
