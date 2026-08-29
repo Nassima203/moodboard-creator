@@ -357,21 +357,7 @@
     applyZoom();
     var canvas = $('#canvas');
     canvas.innerHTML = '';
-    canvas.appendChild(buildEmptyHint());
     state.board.elements.forEach(renderElement);
-    updateEmptyHint();
-  }
-
-  function buildEmptyHint(){
-    var d = document.createElement('div');
-    d.className = 'hint-empty';
-    d.id = 'hint-empty';
-    d.innerHTML = '<h3>Tableau vide</h3><p>Utilise la barre en bas pour épingler une image, un mot ou une couleur.</p>';
-    return d;
-  }
-  function updateEmptyHint(){
-    var hint = $('#hint-empty');
-    if(hint) hint.style.display = state.board.elements.length ? 'none' : 'block';
   }
 
   $('#board-name-input').addEventListener('input', function(e){
@@ -406,7 +392,6 @@
     }
     state.board.elements.push(el);
     renderElement(el);
-    updateEmptyHint();
     markDirty();
     selectElement(el.id);
     return el;
@@ -668,7 +653,6 @@
       node.remove();
       tb.remove();
       state.selectedId = null;
-      updateEmptyHint();
       markDirty();
     });
     tb.appendChild(delBtn);

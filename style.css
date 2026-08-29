@@ -298,13 +298,6 @@
   .font-picker-list .font-picker-item.active{background:var(--accent-soft);color:var(--accent-ink);font-weight:600;}
   .font-picker-empty{padding:12px 8px;font-size:12px;color:var(--ink-soft);text-align:center;}
 
-  .hint-empty{
-    position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
-    text-align:center;color:var(--ink-soft);pointer-events:none;width:380px;max-width:80vw;z-index:5;
-  }
-  .hint-empty h3{font-family:'Fraunces',serif;font-size:30px;color:var(--ink);margin-bottom:10px;}
-  .hint-empty p{font-size:16px;line-height:1.6;}
-
   /* ---------- MODAL ---------- */
   .modal-overlay{
     position:fixed;inset:0;background:rgba(33,31,27,0.55);z-index:100;
