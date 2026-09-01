@@ -4,10 +4,18 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Épingle — Créateur de moodboards</title>
+<script>
+(function(){
+  try{
+    var saved = localStorage.getItem('nassimood_theme');
+    var theme = saved || ((window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light');
+    document.documentElement.setAttribute('data-theme', theme);
+  }catch(e){}
+})();
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,900&family=Space+Grotesk:wght@400;500;700&family=Space+Mono:wght@400;700&family=Playfair+Display:wght@400;700&family=Cormorant+Garamond:wght@500;600&family=DM+Serif+Display&family=Manrope:wght@400;700&family=Archivo:wght@400;700&family=Caveat:wght@500;700&family=Kalam:wght@400;700&family=Permanent+Marker&family=Shadows+Into+Light&family=JetBrains+Mono:wght@400;700&family=Bebas+Neue&family=Unbounded:wght@400;700&family=Righteous&family=Sora:wght@400;700&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="fonts-data.js"></script>
 <link rel="stylesheet" href="style.css">
 </head>
@@ -18,10 +26,9 @@
   <section id="screen-landing" class="screen active">
     <div class="landing-topbar">
       <span class="logo topbar-logo">NASSIMOOD<span class="dot">.</span></span>
-      <button class="landing-link" id="landing-login-link">Déjà un compte ? Se connecter</button>
+      <button class="landing-link" id="landing-dashboard-link">Mes moodboards</button>
     </div>
     <div class="landing-hero">
-      <span class="landing-kicker">Studio créatif</span>
       <h1 class="landing-title">Là où <span class="accent-underline">l'inspiration</span> rencontre l'innovation.</h1>
       <p class="landing-sub">Épingle des images, des mots et des couleurs pour donner forme à tes idées. Ton atelier visuel, pensé pour explorer, composer et créer sans limites.</p>
       <button class="btn btn-primary landing-cta" id="btn-landing-cta">
@@ -34,6 +41,7 @@
       <div class="deco-card deco-text deco-text-1"><span>crée, épingle, rêve</span></div>
       <div class="deco-card deco-color deco-pink"><span class="deco-tag">#D4537E</span></div>
       <div class="deco-card deco-text deco-idea"><span>idées</span></div>
+      <div class="deco-card deco-image deco-galaxy"><img src="Galaxy.jpeg" alt=""></div>
     </div>
   </section>
 
@@ -69,7 +77,7 @@
       </div>
       <div class="topbar-right">
         <span class="who" id="who-label"></span>
-        <button class="btn-icon" id="btn-logout" title="Changer de profil">↩</button>
+        <button class="btn-icon" id="btn-logout" title="Se déconnecter">↩</button>
       </div>
     </header>
     <main>
@@ -121,12 +129,32 @@
           <svg class="tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
           <span>Couleur</span>
         </button>
+        <div class="shape-picker" id="shape-picker">
+          <button class="tool-btn" id="btn-shape">
+            <svg class="tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="8" height="8"/><circle cx="17" cy="7" r="4"/><path d="M12 21l5-9 5 9z"/></svg>
+            <span>Forme</span>
+          </button>
+        </div>
+        <div class="draw-picker" id="draw-picker">
+          <button class="tool-btn" id="btn-draw">
+            <svg class="tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg>
+            <span>Dessiner</span>
+          </button>
+        </div>
+        <div class="bg-picker" id="bg-picker">
+          <button class="tool-btn" id="btn-bg">
+            <svg class="tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22a10 10 0 1 1 0-20c5 0 9 3.5 9 8 0 2-1.5 3-3.5 3H15a2 2 0 0 0-1 3.7c.4.6.1 1.3-.5 1.6-.5.3-1 .7-1 1.7 0 1-1 2-2 2Z"/><circle cx="6.5" cy="11.5" r="1.1"/><circle cx="9.5" cy="7.5" r="1.1"/><circle cx="14.5" cy="7.5" r="1.1"/><circle cx="17.5" cy="11.5" r="1.1"/></svg>
+            <span>Fond</span>
+          </button>
+        </div>
       </div>
     </div>
     <input type="file" id="file-input" class="file-input-hidden" accept="image/*" aria-label="Choisir une image à épingler">
   </section>
 
 </div>
+
+<button class="theme-toggle" id="theme-toggle" title="Changer de thème">🌙</button>
 
 <div class="modal-overlay" id="modal-overlay">
   <div class="modal-box" id="modal-box"></div>
